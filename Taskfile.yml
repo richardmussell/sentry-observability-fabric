@@ -1,0 +1,34 @@
+version: '3'
+
+tasks:
+  default:
+    cmds:
+      - task --list
+    silent: true
+
+  up:
+    desc: "Deploy the Sentry Observability Fabric"
+    cmds:
+      - docker-compose -f deploy/docker-compose.yml up -d
+
+  sentinel:
+    desc: "Launch the Rust Sentinel"
+    cmds:
+      - cd sentinel && cargo run
+
+  verify:
+    desc: "Zero-Warning Gatekeeper: Format, Clippy, and Tests"
+    cmds:
+      - cd sentinel && cargo fmt --all --check
+      - cd sentinel && cargo clippy -- -D warnings
+      - cd sentinel && cargo test
+
+  status:
+    desc: "Check health of the sentinel"
+    cmds:
+      - curl -s localhost:8080/metrics | grep sentry
+
+  down:
+    desc: "Decommission the stack"
+    cmds:
+      - docker-compose -f deploy/docker-compose.yml down
